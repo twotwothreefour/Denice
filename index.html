@@ -1,0 +1,241 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiz Time 💛</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #fffbea;
+      text-align: center;
+      padding: 50px;
+      overflow-x: hidden;
+    }
+    #quiz-box {
+      max-width: 500px;
+      margin: auto;
+      background: #fffacd;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #ffcc00;
+    }
+    .question {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+      color: #444;
+    }
+    .option {
+      display: block;
+      margin: 10px auto;
+      padding: 12px 20px;
+      background: #ffe066;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: 0.3s;
+      width: 80%;
+    }
+    .option:hover {
+      background: #ffd43b;
+      color: #000;
+    }
+    #result {
+      font-size: 1.4em;
+      margin-top: 20px;
+      color: #222;
+    }
+    #final-message {
+      margin-top: 30px;
+      font-size: 1.6em;
+      color: #ffb700;
+      animation: fadeIn 2s ease-in-out;
+    }
+    .date-btn {
+      margin: 10px;
+      padding: 10px 20px;
+      background-color: #ffea00;
+      border: none;
+      border-radius: 10px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    .date-btn:hover {
+      background-color: #ffd600;
+    }
+    #final-photo {
+      margin-top: 20px;
+      max-width: 100%;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      animation: fadeIn 2s ease-in-out;
+    }
+    .heart {
+      position: fixed;
+      width: 20px;
+      height: 20px;
+      background: red;
+      transform: rotate(45deg);
+      animation: floatHearts 5s infinite ease-in-out;
+      opacity: 0.6;
+      z-index: 9999;
+    }
+    .heart::before,
+    .heart::after {
+      content: "";
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: red;
+      border-radius: 50%;
+    }
+    .heart::before {
+      top: -10px;
+      left: 0;
+    }
+    .heart::after {
+      left: -10px;
+      top: 0;
+    }
+    @keyframes floatHearts {
+      0% {transform: translateY(0) rotate(45deg);}
+      100% {transform: translateY(-100vh) rotate(45deg);}
+    }
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+  </style>
+</head>
+<body>
+  <div id="quiz-box">
+    <h1>How Well Do You Know Lucy?</h1>
+    <div id="question-container">
+      <div class="question" id="question"></div>
+      <div id="options"></div>
+    </div>
+    <div id="result"></div>
+    <div id="final-message"></div>
+    <div id="loop-question" style="display:none; margin-top: 30px;">
+      <strong>Are you sure? How about yes?</strong><br><br>
+      <button class="date-btn" onclick="sayYes()">Yes</button>
+      <button class="date-btn" onclick="askAgain()">Maybe</button>
+    </div>
+    <img id="final-photo" src="photo_optimized.jpg" alt="Us at the beach" style="display:none;">
+  </div>
+
+  <div id="song-title" style="margin-top: 20px; font-style: italic; color: #888;">🎵 Now Playing: Everyday With You</div>
+  <audio id="bg-music" src="everyday_with_you.mp3" loop></audio>
+
+  <script>
+    const quiz = [
+      { question: "What's your favorite color?", options: ["Blue", "Yellow", "Green", "Red"], answer: "Yellow" },
+      { question: "Where would you love to live in?", options: ["Japan", "New Zealand", "New York", "South Korea"], answer: "New Zealand" },
+      { question: "What type of enco date do you think will happen?", options: ["Roller Skates", "Bowling", "Billiards", "Arcade"], answer: "Roller Skates" }
+    ];
+    let current = 0, score = 0;
+    const questionEl = document.getElementById("question");
+    const optionsEl = document.getElementById("options");
+    const resultEl = document.getElementById("result");
+    const finalMessageEl = document.getElementById("final-message");
+    const photoEl = document.getElementById("final-photo");
+    const loopEl = document.getElementById("loop-question");
+
+    function showQuestion() {
+      const q = quiz[current];
+      questionEl.textContent = q.question;
+      optionsEl.innerHTML = "";
+      q.options.forEach(option => {
+        const btn = document.createElement("button");
+        btn.textContent = option;
+        btn.className = "option";
+        btn.onclick = () => selectOption(option);
+        optionsEl.appendChild(btn);
+      });
+    }
+
+    function selectOption(selected) {
+ // Try playing music on first interaction
+  const music = document.getElementById('bg-music');
+  if (music.paused) {
+    music.play().catch((e) => {
+      console.log("Autoplay blocked:", e);
+    });
+  }
+      if (selected === quiz[current].answer) score++;
+      current++;
+      if (current < quiz.length) showQuestion();
+      else showResult();
+    }
+
+    function showResult() {
+      questionEl.style.display = "none";
+      optionsEl.style.display = "none";
+      resultEl.textContent = `You got ${score} out of ${quiz.length} right!`;
+      finalMessageEl.innerHTML = `🥳 You're awesome!<br><br>So... I have one last question for you:<br><br><strong>Will you go on an Encouragement date with me? 🌼💛</strong><br><br><button class="date-btn" onclick="sayYes()">Yes</button><button class="date-btn" onclick="askAgain()">Maybe</button>`;
+      photoEl.style.display = 'block';
+      launchHearts();
+    }
+
+    function askAgain() {
+      finalMessageEl.style.display = "none";
+      loopEl.style.display = "block";
+    }
+
+    function sayYes() {
+      alert('Yay! I can’t wait! 💖');
+      finalMessageEl.innerHTML = "Yay! This is going to be amazing 💛 See you on July 6, 2pm";
+      finalMessageEl.style.display = "block";
+      loopEl.style.display = "none";
+
+      const music = document.getElementById('bg-music');
+      const title = document.getElementById('song-title');
+
+      let volume = music.volume;
+      const fadeOut = setInterval(() => {
+        if (volume > 0.05) {
+          volume -= 0.05;
+          music.volume = volume;
+        } else {
+          clearInterval(fadeOut);
+          music.pause();
+          music.src = "hyehwadong.mp3";
+          music.load();
+          music.volume = 0;
+          music.play();
+          title.textContent = "🎵 Now Playing: Hyehwadong";
+
+          let fadeInVolume = 0;
+          const fadeIn = setInterval(() => {
+            if (fadeInVolume < 0.95) {
+              fadeInVolume += 0.05;
+              music.volume = fadeInVolume;
+            } else {
+              music.volume = 1;
+              clearInterval(fadeIn);
+            }
+          }, 200);
+        }
+      }, 150);
+    }
+
+    function launchHearts() {
+      for (let i = 0; i < 20; i++) {
+        const heart = document.createElement('div');
+        heart.classList.add('heart');
+        heart.style.left = `${Math.random() * 100}vw`;
+        heart.style.animationDuration = `${4 + Math.random() * 2}s`;
+        document.body.appendChild(heart);
+        setTimeout(() => heart.remove(), 6000);
+      }
+    }
+
+    showQuestion();
+  </script>
+</body>
+</html>
